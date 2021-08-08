@@ -1,10 +1,19 @@
+use std::env;
+
 mod graph;
 
-use graph::{Successors, Graph, NodeIndex};
+use graph::{Graph, NodeIndex, Walker};
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 3 {
+        eprintln!("Usage: {} start_city end_city", args[0]);
+        panic!();
+    }
+
     let mut graph = Graph::new();
-    
+
     // Define each node. Each of these values is actually an index
     let oradea = graph.add_node("Oradea");
     let zerind = graph.add_node("Zerind");
@@ -52,24 +61,44 @@ fn main() {
     graph.add_edge(vaslui, iasi, 92);
     graph.add_edge(iasi, neamt, 87);
 
-    let mut start_node: NodeIndex;
-    let mut end_node: NodeIndex;
+    let start_node: Option<NodeIndex> = graph.find_node(&args[1]);
+    let end_node: Option<NodeIndex> = graph.find_node(&args[2]);
 
-    for node in &graph.nodes {
-        print!("{} | ", node.node_name);
-
-        for edge_idx in &node.outgoing_edges {
-            // Find all the connected nodes via the edges
-            let edge = graph.edges[*edge_idx];
-
-            if edge.source != node.node_index {
-                print!("{}({}) ", &graph.nodes[edge.source].node_name, edge.edge_weight);
-            }
-            if edge.target != node.node_index {
-                print!("{}({}) ", &graph.nodes[edge.target].node_name, edge.edge_weight);
-            }
-        }
-
-        println!("");
+    if start_node.is_some() && end_node.is_some() {
+        println!("Start Idx: {} | End Idx: {}", start_node.unwrap(), end_node.unwrap());
+    } else {
+        eprintln!("One of the nodes does not exist");
+        panic!();
     }
+
+
+    // Traverse every node in the graph and output the nodes
+    // that it is connected to, with the weight of the edge between them.
+//     for node in &graph.nodes {
+//         print!("{} | ", node.node_name);
+// 
+//         for edge_idx in &node.outgoing_edges {
+//             // Find all the connected nodes via the edges
+//             let edge = graph.edges[*edge_idx];
+// 
+//             if edge.source != node.node_index {
+//                 print!(
+//                     "{}({}) ",
+//                     &graph.nodes[edge.source].node_name, edge.edge_weight
+//                 );
+//             }
+// 
+//             if edge.target != node.node_index {
+//                 print!(
+//                     "{}({}) ",
+//                     &graph.nodes[edge.target].node_name, edge.edge_weight
+//                 );
+//             }
+//         }
+// 
+//         println!("");
+//     }
+// 
+    // let mut walker: Walker = Walker::new(bucharest, &graph);
+    // println!("{:#?}", walker.next());
 }
